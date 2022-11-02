@@ -69,9 +69,12 @@ def get_smev_wait_send():
 Метод получения сводки МФЦ/ПГУ
 """
 def get_rep_pgu_mfc():
-    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'gis_yest': '0', 'pgu_to': '0', 'mfc_to': '0', 'gis_to': '0', 'gis_week': '0'}
+    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'gis_yest': '0', 'all_yest': '0', 'net_yest': '0',
+           'pgu_to': '0', 'mfc_to': '0', 'gis_to': '0', 'all_to': '0', 'net_to': '0',
+           'gis_week': '0'}
     with pymssql.connect(host = adress['host'], database = adress['database'], user = adress['user'], password = adress['password'], charset='cp1251') as conn:
         with conn.cursor() as cursor:
+            #Вчера
             cursor.execute(select.report_epgu_yest)
             for row in cursor:
                 rep['pgu_yest'] = row[0]
@@ -81,6 +84,14 @@ def get_rep_pgu_mfc():
             cursor.execute(select.report_gis_yest)
             for row in cursor:
                 rep['gis_yest'] = row[0]
+            cursor.execute(select.report_all_yest)
+            for row in cursor:
+                rep['all_yest'] = row[0]
+            cursor.execute(select.report_net_yest)
+            for row in cursor:
+                rep['net_yest'] = row[0]
+
+            #Сегодня
             cursor.execute(select.report_epgu_to)
             for row in cursor:
                 rep['pgu_to'] = row[0]
@@ -90,6 +101,14 @@ def get_rep_pgu_mfc():
             cursor.execute(select.report_gis_to)
             for row in cursor:
                 rep['gis_to'] = row[0]
+            cursor.execute(select.report_all_to)
+            for row in cursor:
+                rep['all_to'] = row[0]
+            cursor.execute(select.report_net_to)
+            for row in cursor:
+                rep['net_to'] = row[0]
+
+            #Неделя
             cursor.execute(select.report_gis_week)
             for row in cursor:
                 rep['gis_week'] = row[0]

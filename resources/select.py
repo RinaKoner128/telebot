@@ -139,12 +139,21 @@ smev_err_proc = "select" \
 
 sel = "select SMEV_REQUEST_VIEW.ID, SMEV_REQUEST_VIEW.StateName, SMEV_REQUEST_VIEW.Date_Request, smev3_mes.mesid from SMEV_REQUEST_VIEW inner join smev3_mes on smev3_mes.rowid = SMEV_REQUEST_VIEW.ID where SMEV_REQUEST_VIEW.StateName like '%ожид%' and SMEV_REQUEST_VIEW.Date_Request >= DATEADD(day,-4, GETDATE())  and smev3_mes.mesid in (select origmesid from smev3_mes where sendstate = 6)"
 
+#Вчера
 report_epgu_yest = "select count(*) from eService_Request where requestId not like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 1"
 report_mfc_yest = "select count(*) from eService_Request where requestId like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 1"
 report_gis_yest = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and DATEDIFF(day, senddate, GETDATE()) = 1"
+report_all_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%'"
+report_net_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, requestDate, GETDATE()) > 2"
+
+#Сегодня
 report_epgu_to = "select count(*) from eService_Request where requestId not like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 0"
 report_mfc_to = "select count(*) from eService_Request where requestId like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 0"
 report_gis_to = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and DATEDIFF(day, senddate, GETDATE()) = 0"
+report_all_to = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 0 and requestId not like '%_(%'"
+report_net_to = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 0 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, requestDate, GETDATE()) > 2"
+
+#Неделя
 report_gis_week = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and senddate >= DATEADD(day,-7, GETDATE())"
 
 nob_pgu = "select count(*) from eservice_missing_request where orderdate >= DATEADD(day,-3, GETDATE())"

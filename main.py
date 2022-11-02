@@ -39,7 +39,7 @@ def dat_hist(n):
 
             # Оповещение о малом количестве МФЦ заявок
             if datetime.datetime.now().strftime("%H:%M") == "09:30" and datetime.datetime.now().weekday() != 0:
-                if bs.get_rep_pgu_mfc()["mfc_yest"] < 50:
+                if bs.get_rep_pgu_mfc()["mfc_yest"] < 50 and bs.get_rep_pgu_mfc()["mfc_to"] < 150:
                     for i in bs.get_users():
                         telg.notify(token=tockenn, chat_id=i,
                                     message=f'Заявок с МФЦ за вчерашний день мало, очень:\n{str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
@@ -99,19 +99,43 @@ def main_st():
                 yesterday = datetime.date.today() - datetime.timedelta(days=1)
                 today = datetime.date.today()
                 bot.send_message(message.from_user.id,
-                                    f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\nЗаявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\nЗаявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\nЗапросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}')
+                                    f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\n'
+                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\n'
+                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
+                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}\n'
+                                    f'{"_"*30}\n'
+                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_yest"])},\n'
+                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_yest"])}')
                 bot.send_message(message.from_user.id,
-                                    f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\nЗаявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\nЗаявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\nЗапросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])}')
+                                    f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
+                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\n'
+                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\n'
+                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])}\n'
+                                    f'{"_"*30}\n'
+                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_to"])},\n'
+                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_to"])}')
 
             elif message.text.lower() == 'сведения за вчера' or message.text.lower() == 'сведения пгу.мфц.фри за вчера':
                 yesterday = datetime.date.today() - datetime.timedelta(days=1)
                 bot.send_message(message.from_user.id,
-                                    f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\nЗаявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\nЗаявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\nЗапросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}')
+                                    f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\n'
+                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\n'
+                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
+                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}\n'
+                                    f'{"_"*30}\n'
+                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_yest"])},\n'
+                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_yest"])}')
 
             elif message.text.lower() == 'сведения за сегодня' or message.text.lower() == 'сведения пгу.мфц.фри за сегодня':
                 today = datetime.date.today()
                 bot.send_message(message.from_user.id,
-                                    f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\nЗаявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\nЗаявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\nЗапросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])}')
+                                    f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
+                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\n'
+                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\n'
+                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])} \n'
+                                    f'{"_"*30}\n'
+                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_to"])},\n'
+                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_to"])}')
 
             elif message.text.lower() == 'сводка':
                 bot.send_message(message.from_user.id, f'Запросы, ждущие отправки:\n\n{str(bs.get_smev_report_full())}')
@@ -176,7 +200,7 @@ def main_st():
         if call.data == "all":
             try:
                 bot.send_message(call.message.chat.id, 'Файл формируется. Пожалуйста, подождите несколько секунд.')
-                bot.send_sticker(call.message.chat.id, 'CAACAgIAAxkBAAEFriJjCIOlvJlqCLVOqiPs2N-l-aaY8gAC-REAAuxJ-UvhBonFocPjVCkE')
+                bot.send_sticker(call.message.chat.id, 'CAACAgIAAxkBAAEGQwtjX45RB3O9j-troQS5R_i2S2kbVQAClgoAAmXXSEqeC5Vjb_xP4CoE')
                 bs.get_smev_err()
                 file = open('Сбои.xlsx', 'rb')
                 bot.send_animation(call.message.chat.id, file)
@@ -187,7 +211,7 @@ def main_st():
         if call.data == "slice":
             try:
                 bot.send_message(call.message.chat.id, 'Файл формируется. Пожалуйста, подождите несколько секунд.')
-                bot.send_sticker(call.message.chat.id, 'CAACAgIAAxkBAAEFtZdjDK9SqBy1g5ReuxH3zca10D946AAC4RUAArRM2EnZ3DPB3rAICCkE')
+                bot.send_sticker(call.message.chat.id, 'CAACAgIAAxkBAAEGQw1jX45XoJeLQIcxLoIDyW2FTPgZ_wACIwADKA9qFCdRJeeMIKQGKgQ')
                 bs.get_smev_err_heal()
                 file = open('Сбои.xlsx', 'rb')
                 bot.send_document(call.message.chat.id, file)
