@@ -26,10 +26,9 @@ layout = dict(zip(map(ord, "qwertyuiop[]asdfghjkl;'zxcvbnm,./`"
                            'QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>?~'),
                            "йцукенгшщзхъфывапролджэячсмитьбю.ё"
                            'ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,Ё'))
-
+li = [1850516818]
 
 def dat_hist(n):
-    li = [1850516818]
     maxm = 35000
     check = 0
     while True:
@@ -71,8 +70,8 @@ def main_st():
     try:
         keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
         buttons_smev_ti = ["СМЭВ", "Сводка", "Ошибки"]
-        buttons_pgu_mfc = ["Сведения за вчера", "Сведения за сегодня", "Прочее"]
-        buttons_graf = ["График 📉"]
+        buttons_pgu_mfc = ["Заявки за вчера", "Заявки за сегодня", "Прочее"]
+        buttons_graf = ["График 📉","ГИС ФРИ/ЕГР ЗАГС"]
         but_help = 'Инфо ❓'
         keyboard.add(*buttons_smev_ti)
         keyboard.add(*buttons_pgu_mfc)
@@ -85,6 +84,12 @@ def main_st():
             bot.send_message(m.chat.id,
                             'Добрый день. Я тестовый бот для анализа нагруженности ТИ. Выберите Вид сведений, которые хотите получить.', reply_markup=keyboard)
 
+        # @bot.message_handler(commands=["new"])
+        # def update(message):
+        #     for user in li:
+        #         bot.send_message(user, 'Обновление', reply_markup=keyboard)
+
+
         @bot.message_handler(content_types=['text'])
         def start(message):
             message.text = str(message.text).translate(layout)
@@ -95,47 +100,66 @@ def main_st():
                     bot.send_message(message.from_user.id,
                                     f'СМЭВ на ТИ\nЗапросы, ожидающие отправки: {str(bs.get_smev_wait_send())}.\nВсего запросов в отправке: {str(bs.get_smev_request_sending())}')
 
-            elif message.text.lower() == 'сведения пгу.мфц.фри' or message.text.lower() == 'пгу' or message.text.lower() == 'мфц' or message.text.lower() == 'гис' or message.text.lower() == 'фри' or message.text.lower() == 'сведения':
+            elif message.text.lower() == 'заявки пгу.мфц.фри' or message.text.lower() == 'пгу' or message.text.lower() == 'мфц' or message.text.lower() == 'гис' or message.text.lower() == 'фри' or message.text.lower() == 'заявки':
                 yesterday = datetime.date.today() - datetime.timedelta(days=1)
                 today = datetime.date.today()
                 bot.send_message(message.from_user.id,
                                     f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\n'
-                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\n'
-                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
-                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}\n'
+                                    f'ПГУ: {str(bs.get_yest()["pgu_yest"])}\n'
+                                    f'МФЦ: {str(bs.get_yest()["mfc_yest"])}\n'
                                     f'{"_"*30}\n'
-                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_yest"])},\n'
-                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_yest"])}')
+                                    f'Всего на ТИ загружено: {str(bs.get_yest()["all_yest"])},\n'
+                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}')
                 bot.send_message(message.from_user.id,
                                     f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
-                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\n'
-                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\n'
-                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])}\n'
+                                    f'ПГУ: {str(bs.get_to()["pgu_to"])}\n'
+                                    f'МФЦ: {str(bs.get_to()["mfc_to"])}\n'
                                     f'{"_"*30}\n'
-                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_to"])},\n'
-                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_to"])}')
+                                    f'Всего на ТИ загружено: {str(bs.get_to()["all_to"])},\n'
+                                    f'из них в АСП не загрузилось: {str(bs.get_to()["net_to"])}')
 
-            elif message.text.lower() == 'сведения за вчера' or message.text.lower() == 'сведения пгу.мфц.фри за вчера':
+            elif message.text.lower() == 'заявки за вчера' or message.text.lower() == 'заявки пгу.мфц.фри за вчера':
                 yesterday = datetime.date.today() - datetime.timedelta(days=1)
                 bot.send_message(message.from_user.id,
                                     f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\n'
-                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_yest"])}\n'
-                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
-                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_yest"])}\n'
+                                    f'ПГУ: {str(bs.get_yest()["pgu_yest"])}\n'
+                                    f'МФЦ: {str(bs.get_yest()["mfc_yest"])}\n'
                                     f'{"_"*30}\n'
-                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_yest"])},\n'
-                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_yest"])}')
+                                    f'Всего на ТИ загружено: {str(bs.get_yest()["all_yest"])},\n'
+                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}')
 
-            elif message.text.lower() == 'сведения за сегодня' or message.text.lower() == 'сведения пгу.мфц.фри за сегодня':
+            elif message.text.lower() == 'заявки за сегодня' or message.text.lower() == 'заявки пгу.мфц.фри за сегодня':
                 today = datetime.date.today()
                 bot.send_message(message.from_user.id,
                                     f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
-                                    f'Заявок с ПГУ: {str(bs.get_rep_pgu_mfc()["pgu_to"])}\n'
-                                    f'Заявок с МФЦ: {str(bs.get_rep_pgu_mfc()["mfc_to"])}\n'
-                                    f'Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_to"])} \n'
+                                    f'ПГУ: {str(bs.get_to()["pgu_to"])}\n'
+                                    f'МФЦ: {str(bs.get_to()["mfc_to"])}\n'
                                     f'{"_"*30}\n'
-                                    f'Всего на ТИ пришло: {str(bs.get_rep_pgu_mfc()["all_to"])},\n'
-                                    f'из них не дошли до АСП: {str(bs.get_rep_pgu_mfc()["net_to"])}')
+                                    f'Всего на ТИ загружено: {str(bs.get_to()["all_to"])},\n'
+                                    f'из них в АСП не загрузилось: {str(bs.get_to()["net_to"])}')
+
+
+
+            elif message.text.lower() == 'гис фри.егр загс' or message.text.lower() == 'егр загс' or message.text.lower() == 'гис фри' or message.text.lower() == 'гис' or message.text.lower() == 'фри' or message.text.lower() == 'егр' or message.text.lower() == 'загс' :
+                yesterday = datetime.date.today() - datetime.timedelta(days=1)
+                today = datetime.date.today()
+                bot.send_message(message.from_user.id,
+                                    f'За {(yesterday.strftime(f"%d {bs.month_list[yesterday.month - 1]} %Y"))}:\n'
+                                    f'ГИС ФРИ: {str(bs.get_gis_zags()["gis_yest"])}\n'
+                                    f'ЕГР ЗАГС: {str(bs.get_gis_zags()["zags_yest"])}\n'
+                                    f'{"_"*30}\n'
+                                    f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
+                                    f'ГИС ФРИ: {str(bs.get_gis_zags()["gis_to"])}\n'
+                                    f'ЕГР ЗАГС: {str(bs.get_gis_zags()["zags_to"])}\n'
+                                    f'{"_"*30}\n'
+                                    f'За последние 7 дней:\n'
+                                    f'ГИС ФРИ: {str(bs.get_gis_zags()["gis_week"])}\n'
+                                    f'ЕГР ЗАГС: {str(bs.get_gis_zags()["zags_week"])}\n'
+                                 )
+
+
+
+
 
             elif message.text.lower() == 'сводка':
                 bot.send_message(message.from_user.id, f'Запросы, ждущие отправки:\n\n{str(bs.get_smev_report_full())}')
@@ -161,8 +185,7 @@ def main_st():
                 bot.send_message(message.from_user.id,
                                 f'За последние 3 дня Необработанных заявок:  {str(bs.get_fil_count()["nbo_pgu"])}.\n'
                                 f'За последние 3 дня Нераспределенных по районам заявок:  {str(bs.get_fil_count()["dist_pgu"])}.\n'
-                                f'За последние 7 дней "УСЗН" заявок:    {str(bs.get_fil_count()["uszn"])}.\n'
-                                f'За последние 7 дней Запросов с ГИС ФРИ: {str(bs.get_rep_pgu_mfc()["gis_week"])}.')
+                                f'За последние 7 дней "УСЗН" заявок:    {str(bs.get_fil_count()["uszn"])}.')
 
             elif message.text.lower() == 'график' or message.text == 'График 📉':
                 bs.draw_graf()

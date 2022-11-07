@@ -137,24 +137,29 @@ smev_err_proc = "select" \
                 "and senddate >= DATEADD(day,-7, GETDATE())" \
                 "order by smev3_mes.senddate desc"
 
+smev_err_asp = "select distinct requestId as 'Номер заявки', lower(SMEV3MESSAGEID) as 'Сообщение', requestId  as 'Дата обращения', senderName as 'ИС отправителя' from EService_Request where (DATEDIFF(day, EService_Request.requestDate, GETDATE()) = 1 or DATEDIFF(day, EService_Request.requestDate, GETDATE()) = 0) and EService_Request.requestId not like '%_(%' and EService_Request.exportDate is null and DATEDIFF(hour, EService_Request.insertDate, GETDATE()) > 2"
+
 sel = "select SMEV_REQUEST_VIEW.ID, SMEV_REQUEST_VIEW.StateName, SMEV_REQUEST_VIEW.Date_Request, smev3_mes.mesid from SMEV_REQUEST_VIEW inner join smev3_mes on smev3_mes.rowid = SMEV_REQUEST_VIEW.ID where SMEV_REQUEST_VIEW.StateName like '%ожид%' and SMEV_REQUEST_VIEW.Date_Request >= DATEADD(day,-4, GETDATE())  and smev3_mes.mesid in (select origmesid from smev3_mes where sendstate = 6)"
 
 #Вчера
 report_epgu_yest = "select count(*) from eService_Request where requestId not like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 1"
 report_mfc_yest = "select count(*) from eService_Request where requestId like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 1"
 report_gis_yest = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and DATEDIFF(day, senddate, GETDATE()) = 1"
+report_zags_yest = "select count(*) from smev3_mes where namespaceuri = 'urn://x-artefacts-zags-fatalinf/root/112-52/4.0.1'and DATEDIFF(day, senddate, GETDATE()) = 1"
 report_all_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%'"
-report_net_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, requestDate, GETDATE()) > 2"
+report_net_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, insertDate, GETDATE()) > 2"
 
 #Сегодня
 report_epgu_to = "select count(*) from eService_Request where requestId not like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 0"
 report_mfc_to = "select count(*) from eService_Request where requestId like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 0"
 report_gis_to = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and DATEDIFF(day, senddate, GETDATE()) = 0"
+report_zags_to = "select count(*) from smev3_mes where namespaceuri = 'urn://x-artefacts-zags-fatalinf/root/112-52/4.0.1'and DATEDIFF(day, senddate, GETDATE()) = 0"
 report_all_to = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 0 and requestId not like '%_(%'"
-report_net_to = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 0 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, requestDate, GETDATE()) > 2"
+report_net_to = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 0 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, insertDate, GETDATE()) > 2"
 
 #Неделя
 report_gis_week = "select count(*) from smev3_mes where namespaceuri = 'http://kvs.fri.com/initiative-distribution/1.0.2'and senddate >= DATEADD(day,-7, GETDATE())"
+report_zags_week = "select count(*) from smev3_mes where namespaceuri = 'urn://x-artefacts-zags-fatalinf/root/112-52/4.0.1'and senddate >= DATEADD(day,-7, GETDATE())"
 
 nob_pgu = "select count(*) from eservice_missing_request where orderdate >= DATEADD(day,-3, GETDATE())"
 uszn = "select count(*) from EService_Request where EService_Users_id = 26 and orderdate >= DATEADD(day,-7, GETDATE())"

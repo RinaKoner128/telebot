@@ -66,53 +66,79 @@ def get_smev_wait_send():
 
 
 """
-Метод получения сводки МФЦ/ПГУ
+Метод получения сводки МФЦ/ПГУ за вчера
 """
-def get_rep_pgu_mfc():
-    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'gis_yest': '0', 'all_yest': '0', 'net_yest': '0',
-           'pgu_to': '0', 'mfc_to': '0', 'gis_to': '0', 'all_to': '0', 'net_to': '0',
-           'gis_week': '0'}
+def get_yest():
+    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'all_yest': '0', 'net_yest': '0'}
     with pymssql.connect(host = adress['host'], database = adress['database'], user = adress['user'], password = adress['password'], charset='cp1251') as conn:
         with conn.cursor() as cursor:
-            #Вчера
             cursor.execute(select.report_epgu_yest)
             for row in cursor:
                 rep['pgu_yest'] = row[0]
             cursor.execute(select.report_mfc_yest)
             for row in cursor:
                 rep['mfc_yest'] = row[0]
-            cursor.execute(select.report_gis_yest)
-            for row in cursor:
-                rep['gis_yest'] = row[0]
             cursor.execute(select.report_all_yest)
             for row in cursor:
                 rep['all_yest'] = row[0]
             cursor.execute(select.report_net_yest)
             for row in cursor:
                 rep['net_yest'] = row[0]
+            return rep
 
-            #Сегодня
+
+"""
+Метод получения сводки МФЦ/ПГУ за сегодня
+"""
+def get_to():
+    rep = {'pgu_to': '0', 'mfc_to': '0', 'all_to': '0', 'net_to': '0'}
+    with pymssql.connect(host = adress['host'], database = adress['database'], user = adress['user'], password = adress['password'], charset='cp1251') as conn:
+        with conn.cursor() as cursor:
             cursor.execute(select.report_epgu_to)
             for row in cursor:
                 rep['pgu_to'] = row[0]
             cursor.execute(select.report_mfc_to)
             for row in cursor:
                 rep['mfc_to'] = row[0]
-            cursor.execute(select.report_gis_to)
-            for row in cursor:
-                rep['gis_to'] = row[0]
             cursor.execute(select.report_all_to)
             for row in cursor:
                 rep['all_to'] = row[0]
             cursor.execute(select.report_net_to)
             for row in cursor:
                 rep['net_to'] = row[0]
+            return rep
 
-            #Неделя
+
+
+
+
+"""
+Метод получения сводки ГИС ФРИ и ЕГР ЗАГС
+"""
+def get_gis_zags():
+    rep = {'gis_yest': '0', 'gis_to': '0', 'gis_week': '0', 'zags_yest': '0', 'zags_to': '0', 'zags_week': '0'}
+    with pymssql.connect(host = adress['host'], database = adress['database'], user = adress['user'], password = adress['password'], charset='cp1251') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(select.report_gis_yest)
+            for row in cursor:
+                rep['gis_yest'] = row[0]
+            cursor.execute(select.report_zags_yest)
+            for row in cursor:
+                rep['zags_yest'] = row[0]
+            cursor.execute(select.report_gis_to)
+            for row in cursor:
+                rep['gis_to'] = row[0]
+            cursor.execute(select.report_zags_to)
+            for row in cursor:
+                rep['zags_to'] = row[0]
             cursor.execute(select.report_gis_week)
             for row in cursor:
                 rep['gis_week'] = row[0]
+            cursor.execute(select.report_zags_week)
+            for row in cursor:
+                rep['zags_week'] = row[0]
             return rep
+
 
 
 
@@ -214,7 +240,7 @@ def get_fil_count():
 
 """
 Метод создания файла со сбоями.
-Запросы СМЭВ_3 и Заявки ПГУ, которые получили статус "Сбой"
+ВСЕ Запросы СМЭВ_3 и Заявки ПГУ, которые получили статус "Сбой"
 """
 def get_smev_err():
     with pymssql.connect(host=adress['host'], database=adress['database'], user=adress['user'], password=adress['password'], charset='cp1251') as conn:
@@ -299,8 +325,15 @@ def get_smev_err_heal():
             cursor.execute(select.smev_err_req_heal)
             for row in cursor:
                 a = np.append(a, [[row[0], row[1], row[2], row[3], row[4], row[5], row[6]]], axis=0)
-            conn.close()
             df_req = pd.DataFrame(a, columns=cols, index=range(1, (a.shape[0] + 1)))
+
+            cols = ["Номер заявки", "Сообщение", "Дата обращения", "ИС отправителя"]
+            a = np.empty(shape=[0, 4])
+            cursor.execute(select.smev_err_asp)
+            for row in cursor:
+                a = np.append(a, [[row[0], row[1], row[2], row[3]]], axis=0)
+            conn.close()
+            df_net_asp = pd.DataFrame(a, columns=cols, index=range(1, (a.shape[0] + 1)))
 
         with pd.ExcelWriter('Сбои.xlsx', engine='xlsxwriter') as wb:
             df_req.to_excel(wb, sheet_name='Заявки', index=False)
@@ -330,6 +363,17 @@ def get_smev_err_heal():
             sheet.set_column('D:D', 46, cell_format)
             sheet.set_column('E:E', 111, cell_format)
             sheet.set_column('F:F', 25, cell_format)
+
+            df_net_asp.to_excel(wb, sheet_name='Не ушедшие с ТИ', index=False)
+            sheet = wb.sheets['Не ушедшие с ТИ']
+            sheet.autofilter(0, 0, 0, 3)
+            cell_format = wb.book.add_format()
+            cell_format.set_font_name('Times New Romance')
+            cell_format.set_font_size(10)
+            cell_format.set_text_wrap()
+            cell_format.set_align('center')
+            cell_format.set_align('vcenter')
+            sheet.set_column('A:D', 25, cell_format)
 
 """
 Блок выстраивания графика.
@@ -444,6 +488,4 @@ def info():
             cursor.execute("select info from telegram.inform")
             for row in cursor:
                 return row[0]
-
-
 
