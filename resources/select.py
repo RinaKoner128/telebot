@@ -137,6 +137,15 @@ smev_err_proc = "select" \
                 "and senddate >= DATEADD(day,-7, GETDATE())" \
                 "order by smev3_mes.senddate desc"
 
+
+smev_1013 = "select EService_Users.name, count(EService_Users.name) " \
+            "from SMEV_SERVICE_TRAVEL_PRIVILEGE_LIP " \
+            "inner join F2 on F2.ID = SMEV_SERVICE_TRAVEL_PRIVILEGE_LIP.F2_id " \
+            "inner join EService_Users on F2.EService_Users_id = EService_Users.id " \
+            "where DATEDIFF(day, SMEV_SERVICE_TRAVEL_PRIVILEGE_LIP.upload_date, GETDATE()) = 1 " \
+            "group by EService_Users.name " \
+            "order by EService_Users.name"
+
 smev_err_asp = "select distinct requestId as 'Номер заявки', lower(SMEV3MESSAGEID) as 'Сообщение', requestId  as 'Дата обращения', senderName as 'ИС отправителя' from EService_Request where (DATEDIFF(day, EService_Request.requestDate, GETDATE()) = 1 or DATEDIFF(day, EService_Request.requestDate, GETDATE()) = 0) and EService_Request.requestId not like '%_(%' and EService_Request.exportDate is null and DATEDIFF(hour, EService_Request.insertDate, GETDATE()) > 2"
 
 sel = "select SMEV_REQUEST_VIEW.ID, SMEV_REQUEST_VIEW.StateName, SMEV_REQUEST_VIEW.Date_Request, smev3_mes.mesid from SMEV_REQUEST_VIEW inner join smev3_mes on smev3_mes.rowid = SMEV_REQUEST_VIEW.ID where SMEV_REQUEST_VIEW.StateName like '%ожид%' and SMEV_REQUEST_VIEW.Date_Request >= DATEADD(day,-4, GETDATE())  and smev3_mes.mesid in (select origmesid from smev3_mes where sendstate = 6)"
@@ -148,6 +157,7 @@ report_gis_yest = "select count(*) from smev3_mes where namespaceuri = 'http://k
 report_zags_yest = "select count(*) from smev3_mes where namespaceuri = 'urn://x-artefacts-zags-fatalinf/root/112-52/4.0.1'and DATEDIFF(day, senddate, GETDATE()) = 1"
 report_all_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%'"
 report_net_yest = "select count(*) from eService_Request where DATEDIFF(day, requestDate, GETDATE()) = 1 and requestId not like '%_(%' and exportDate is null and DATEDIFF(hour, insertDate, GETDATE()) > 2"
+report_elk = "select count(distinct reqtype) from smev3_mes where namespaceuri = 'http://epgu.gosuslugi.ru/elk/status/1.0.2' and DATEDIFF(day, senddate, GETDATE()) = 1"
 
 #Сегодня
 report_epgu_to = "select count(*) from eService_Request where requestId not like '%-%' and requestId not like '%_(%' and DATEDIFF(day, requestDate, GETDATE()) = 0"

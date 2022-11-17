@@ -69,7 +69,7 @@ def get_smev_wait_send():
 Метод получения сводки МФЦ/ПГУ за вчера
 """
 def get_yest():
-    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'all_yest': '0', 'net_yest': '0'}
+    rep = {'pgu_yest': '0', 'mfc_yest': '0', 'all_yest': '0', 'net_yest': '0', 'elk_yest': '0'}
     with pymssql.connect(host = adress['host'], database = adress['database'], user = adress['user'], password = adress['password'], charset='cp1251') as conn:
         with conn.cursor() as cursor:
             cursor.execute(select.report_epgu_yest)
@@ -84,6 +84,9 @@ def get_yest():
             cursor.execute(select.report_net_yest)
             for row in cursor:
                 rep['net_yest'] = row[0]
+            cursor.execute(select.report_elk)
+            for row in cursor:
+                rep['elk_yest'] = row[0]
             return rep
 
 
@@ -181,6 +184,26 @@ def get_smev_report():
             cursor.execute(select.smev_report)
             for row in cursor:
                 a = np.append(a, [[row[0],row[1],row[2]]], axis=0)
+            df = pd.DataFrame(a, columns=cols, index=range(1, (a.shape[0]+1)))
+            pd.set_option('max_colwidth', 37)
+        return df
+
+
+
+
+"""
+Метод создания сводки.
+СМЭВ запросы По 1013
+"""
+
+def get_smev_1013():
+    with pymssql.connect(host=adress['host'], database=adress['database'], user=adress['user'], password=adress['password'], charset='cp1251') as conn:
+        with conn.cursor() as cursor:
+            cols = ["Район", "кол-во"]
+            a = np.empty(shape=[0, 2])
+            cursor.execute(select.smev_1013)
+            for row in cursor:
+                a = np.append(a, [[row[0],row[1]]], axis=0)
             df = pd.DataFrame(a, columns=cols, index=range(1, (a.shape[0]+1)))
             pd.set_option('max_colwidth', 37)
         return df
@@ -488,4 +511,6 @@ def info():
             cursor.execute("select info from telegram.inform")
             for row in cursor:
                 return row[0]
+
+
 

@@ -38,19 +38,23 @@ def dat_hist(n):
 
             # Оповещение о малом количестве МФЦ заявок
             if datetime.datetime.now().strftime("%H:%M") == "09:30" and datetime.datetime.now().weekday() != 0:
-                if bs.get_rep_pgu_mfc()["mfc_yest"] < 50 and bs.get_rep_pgu_mfc()["mfc_to"] < 150:
+                if bs.get_yest()["mfc_yest"] < 50 and bs.get_to()["mfc_to"] < 150:
                     for i in bs.get_users():
                         telg.notify(token=tockenn, chat_id=i,
-                                    message=f'Заявок с МФЦ за вчерашний день мало, очень:\n{str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
-                                            f'За сегодня заявок: {str(bs.get_rep_pgu_mfc()["mfc_to"])}')
+                                    message=f'Заявок с МФЦ за вчерашний день мало, очень:\n{str(bs.get_yest()["mfc_yest"])}\n'
+                                            f'За сегодня заявок: {str(bs.get_to()["mfc_to"])}')
+                if bs.get_yest()["elk_yest"] == 0:
+                    for i in bs.get_users():
+                        telg.notify(token=tockenn, chat_id=i,
+                                    message=f'За вчера не выгрузилось ЕЛК')
 
             if datetime.datetime.now().strftime("%H:%M") == "16:45" and datetime.datetime.now().weekday() != 0:
-                if bs.get_rep_pgu_mfc()["mfc_yest"] < 50 and bs.get_rep_pgu_mfc()["mfc_to"] < 150:
+                if bs.get_yest()["mfc_yest"] < 50 and bs.get_to()["mfc_to"] < 150:
                     for i in bs.get_users():
                         telg.notify(token=tockenn, chat_id=i,
                                     message=f'За последние 2 дня заявок с МФЦ очень мало:\n'
-                                            f'За вчерашний день: {str(bs.get_rep_pgu_mfc()["mfc_yest"])}\n'
-                                            f'За сегодня заявок: {str(bs.get_rep_pgu_mfc()["mfc_to"])}')
+                                            f'За вчерашний день: {str(bs.get_yest()["mfc_yest"])}\n'
+                                            f'За сегодня заявок: {str(bs.get_to()["mfc_to"])}')
             check = 0
 
 #Оповещение о переполнености очереди
@@ -69,9 +73,9 @@ def dat_hist(n):
 def main_st():
     try:
         keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-        buttons_smev_ti = ["СМЭВ", "Сводка", "Ошибки"]
-        buttons_pgu_mfc = ["Заявки за вчера", "Заявки за сегодня", "Прочее"]
-        buttons_graf = ["График 📉","ГИС ФРИ/ЕГР ЗАГС"]
+        buttons_smev_ti = ["СМЭВ", "Сводка", "1013(ЛТК)"]
+        buttons_pgu_mfc = ["Заявки за вчера", "Заявки за сегодня","ГИС ФРИ/ЕГР ЗАГС"]
+        buttons_graf = ["График 📉", "Прочее", "Ошибки",]
         but_help = 'Инфо ❓'
         keyboard.add(*buttons_smev_ti)
         keyboard.add(*buttons_pgu_mfc)
@@ -86,8 +90,8 @@ def main_st():
 
         # @bot.message_handler(commands=["new"])
         # def update(message):
-        #     for user in li:
-        #         bot.send_message(user, 'Обновление', reply_markup=keyboard)
+        #     for user in bs.get_users():
+        #         bot.send_message(user, 'Программное информирование (обновление функциаонала)', reply_markup=keyboard)
 
 
         @bot.message_handler(content_types=['text'])
@@ -109,7 +113,8 @@ def main_st():
                                     f'МФЦ: {str(bs.get_yest()["mfc_yest"])}\n'
                                     f'{"_"*30}\n'
                                     f'Всего на ТИ загружено: {str(bs.get_yest()["all_yest"])},\n'
-                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}')
+                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}.\n\n'
+                                    f'ЕЛК выгружено: {str(bs.get_yest()["elk_yest"])} из 3.')
                 bot.send_message(message.from_user.id,
                                     f'За {(today.strftime(f"%d {bs.month_list[today.month - 1]} %Y"))}:\n'
                                     f'ПГУ: {str(bs.get_to()["pgu_to"])}\n'
@@ -126,7 +131,8 @@ def main_st():
                                     f'МФЦ: {str(bs.get_yest()["mfc_yest"])}\n'
                                     f'{"_"*30}\n'
                                     f'Всего на ТИ загружено: {str(bs.get_yest()["all_yest"])},\n'
-                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}')
+                                    f'из них в АСП не загрузилось: {str(bs.get_yest()["net_yest"])}.\n\n'
+                                    f'ЕЛК выгружено: {str(bs.get_yest()["elk_yest"])} из 3.')
 
             elif message.text.lower() == 'заявки за сегодня' or message.text.lower() == 'заявки пгу.мфц.фри за сегодня':
                 today = datetime.date.today()
@@ -161,12 +167,24 @@ def main_st():
 
 
 
+
             elif message.text.lower() == 'сводка':
                 bot.send_message(message.from_user.id, f'Запросы, ждущие отправки:\n\n{str(bs.get_smev_report_full())}')
                 if str(bs.get_smev_report()).count('DataFrame'):
                     bot.send_message(message.from_user.id, 'Очередь пуста.')
                 else:
-                    bot.send_message(message.from_user.id, f'Из них запросы, находящиеся в отправке:\n\n{str(bs.get_smev_report())}')
+                    bot.send_message(message.from_user.id,
+                                     f'Из них запросы, находящиеся в отправке:\n\n{str(bs.get_smev_report())}')
+
+
+            elif message.text.lower() == '1013' or message.text.lower() == '1013(лтк)'  :
+                if str(bs.get_smev_1013()).count('DataFrame'):
+                    bot.send_message(message.from_user.id, 'Заявок нет.')
+                else:
+                    bot.send_message(message.from_user.id, f'За вчерашний день:\n\n{str(bs.get_smev_1013()).ljust(10, "*")}')
+
+
+
 
             elif message.text.lower() == 'ошибки':
                 # bot.send_message(message.from_user.id, f'Операция может занять несколько секунд. Пожалуйста, ожидайте результата.')
