@@ -32,12 +32,44 @@ def set_users(id_users):
 """
 def get_users():
     users = []
+    us = {}
     with psycopg2.connect(host=adress_adm['host'], database=adress_adm['database'], user=adress_adm['user'], password=adress_adm['password'], options="-c search_path=telegram") as conn:
         with conn.cursor() as cursor:
             cursor.execute("select distinct id from telegram.users_t")
             for row in cursor:
                 users.append(row[0])
             return users
+
+
+
+
+def get_users_l():
+    users = []
+    us = {}
+    with psycopg2.connect(host=adress_adm['host'], database=adress_adm['database'], user=adress_adm['user'], password=adress_adm['password'], options="-c search_path=telegram") as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("select distinct id from telegram.users_t")
+            for row in cursor:
+                users.append(row[0])
+            cursor.execute("SELECT distinct id, name FROM telegram.users_t")
+            for row in cursor:
+                us[row[0]] = row[1]
+            return us
+
+
+
+
+
+# # print(get_users_l().items())
+# for i in get_users_l().items():
+#     if i[1]!= None:
+#         print(f'({i[0]}){i[1]}, Очередь переполнена')
+#     else:
+#         print(f'({i[0]})Очередь переполнена')
+
+
+
+
 
 
 """
@@ -197,17 +229,29 @@ def get_smev_report():
 """
 
 def get_smev_1013():
+    data = {'Район': ['Воловский район', 'г. Елец', 'Грязинский район', 'Данковский район', 'Добринский район',
+                      'Добровский район', 'Долгоруковский район', 'Елецкий район',
+                      'Задонский район', 'Измалковский район', 'Краснинский район', 'Лебедянский район',
+                      'Левобережный район г. Липецк', 'Октябрьский район г. Липецк', 'Правобережный район г. Липецк',
+                      'Советский район  г. Липецк', 'Лев-Толстовский район', 'Липецкий район', 'Становлянский район',
+                      'Тербунский район', 'Усманский район', 'Хлевенский район', 'Чаплыгинский район']}
+    raj = pd.DataFrame(data)
     with pymssql.connect(host=adress['host'], database=adress['database'], user=adress['user'], password=adress['password'], charset='cp1251') as conn:
         with conn.cursor() as cursor:
             cols = ["Район", "кол-во"]
             a = np.empty(shape=[0, 2])
             cursor.execute(select.smev_1013)
             for row in cursor:
-                a = np.append(a, [[row[0],row[1]]], axis=0)
+                a = np.append(a, [[row[0], row[1]]], axis=0)
             df = pd.DataFrame(a, columns=cols, index=range(1, (a.shape[0]+1)))
+            marge = raj.merge(df, on='Район', how='left')
+            marge.loc[marge['кол-во'].isnull(), 'кол-во'] = 0
+            marge.loc[marge['Район'].notnull(), 'Район'] = marge.loc[marge['Район'].notnull(), 'Район'] + '_'*50
+            marge.set_index('Район', inplace=True)
+            marge["кол-во"] = marge["кол-во"].astype(int)
+            count = marge['кол-во'].sum()
             pd.set_option('max_colwidth', 37)
-        return df
-
+        return marge, count
 
 """
 Метод создания сводки.
@@ -512,5 +556,9 @@ def info():
             for row in cursor:
                 return row[0]
 
+
+# for i in get_smev_1013():
+#     spam = list(*[f"{x:>37}" for x in i])
+# print(spam)
 
 

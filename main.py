@@ -63,9 +63,19 @@ def dat_hist(n):
             f'{datetime.datetime.now().hour}:{datetime.datetime.now().minute}')
         if history[len(history) - 2] > maxm > history[len(history) - 3] and (history[len(history) - 2] < history[len(history) - 1] or history[len(history) - 1] > maxm):
             if datetime.datetime.now().strftime("%H:%M") < "22:00":
-                for i in bs.get_users():
-                    # process = subprocess.Popen("script.bat") #Запуск скрипта типа bat
-                    telg.notify(token=tockenn, chat_id=i, message=f'Превышение допустимой длины очереди. \nЗапросы в очереди: {str(bs.get_smev_request_sending())}')
+                for i in bs.get_users_l().items():
+                    if i[1] != None:
+                        telg.notify(token=tockenn, chat_id=i[0],
+                                    message=f'{i[1]}, Превышение допустимой длины очереди. \nЗапросы в очереди: {str(bs.get_smev_request_sending())}')
+                    else:
+                        telg.notify(token=tockenn, chat_id=i[0], message=f'Превышение допустимой длины очереди. \nЗапросы в очереди: {str(bs.get_smev_request_sending())}')
+
+
+
+                # for i in bs.get_users():
+                #
+                #     # process = subprocess.Popen("script.bat") #Запуск скрипта типа bat
+                #     telg.notify(token=tockenn, chat_id=i, message=f'Превышение допустимой длины очереди. \nЗапросы в очереди: {str(bs.get_smev_request_sending())}')
 
         time.sleep(n)
 
@@ -169,7 +179,10 @@ def main_st():
 
 
             elif message.text.lower() == 'сводка':
-                bot.send_message(message.from_user.id, f'Запросы, ждущие отправки:\n\n{str(bs.get_smev_report_full())}')
+                if str(bs.get_smev_report_full()).count('DataFrame'):
+                    bot.send_message(message.from_user.id, 'Нет запросов ждущих отправки.')
+                else:
+                    bot.send_message(message.from_user.id, f'Запросы, ждущие отправки:\n\n{str(bs.get_smev_report_full())}')
                 if str(bs.get_smev_report()).count('DataFrame'):
                     bot.send_message(message.from_user.id, 'Очередь пуста.')
                 else:
@@ -181,7 +194,8 @@ def main_st():
                 if str(bs.get_smev_1013()).count('DataFrame'):
                     bot.send_message(message.from_user.id, 'Заявок нет.')
                 else:
-                    bot.send_message(message.from_user.id, f'За вчерашний день:\n\n{str(bs.get_smev_1013()).ljust(10, "*")}')
+                    bot.send_message(message.from_user.id, f'За вчерашний день:\n{str(bs.get_smev_1013()[0])}\n'
+                                                           f'Итого:  {str(bs.get_smev_1013()[1])}')
 
 
 
